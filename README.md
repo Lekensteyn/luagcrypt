@@ -59,12 +59,9 @@ Tests
 The basic test suite requires just libgcrypt and Lua and can be invoked with
 `make check` (which invokes `luagcrypt_test.lua`).
 
-In order to check for code coverage by tests without spoiling your user or
-system paths, invoke:
+Run the code coverage checker with:
 
-    HOME=/tmp/rocks make checkcoverage LUAROCKS="luarocks --local" LUA=lua
-
-(The `LUA` variable must match the version used for building with luarocks.)
+    make checkcoverage LUA_DIR=/usr
 
 TODO
 ----

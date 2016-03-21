@@ -10,8 +10,6 @@ CFLAGS     += -O2 -g -I$(LUA_INCDIR)
 LIBFLAG     = -shared
 LDFLAGS     = -lgcrypt -lgpg-error
 
-LUAROCKS    = luarocks
-
 luagcrypt.so: luagcrypt.c
 	@if test ! -e $(LUA_INCDIR)/lua.h; then \
 		echo Could not find lua.h at LUA_INCDIR=$(LUA_INCDIR); \
@@ -24,12 +22,13 @@ check: luagcrypt.so
 .PHONY: clean install
 
 clean:
-	$(RM) luagcrypt.so
+	$(RM) luagcrypt.so luagcrypt.gcda luagcrypt.gcno luagcrypt.o luagcrypt.c.gcov
 
 install: luagcrypt.so
 	install -Dm755 luagcrypt.so $(DESTDIR)$(LUA_LIBDIR)/luagcrypt.so
 
 checkcoverage:
-	$(LUAROCKS) make CFLAGS="-O2 -fPIC -Wall -Wextra -Werror --coverage" LIBFLAG="-shared --coverage"
+	$(MAKE) -s clean
+	$(MAKE) luagcrypt.so CFLAGS="$(CFLAGS) --coverage"
 	$(LUA) luagcrypt_test.lua
 	-gcov -n luagcrypt.c
