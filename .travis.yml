@@ -1,0 +1,28 @@
+language: c
+
+env:
+  - LUA=lua     LUA_VER=5.1
+  - LUA=lua     LUA_VER=5.2
+  - LUA=lua     LUA_VER=5.3
+  - LUA=luajit  LUA_VER=2.0
+  - LUA=luajit  LUA_VER=2.1
+
+addons:
+  apt:
+    packages:
+      - libgcrypt11-dev
+
+before_install:
+  - pip install --user hererocks cpp-coveralls
+  - hererocks lua_install -r^ --$LUA $LUA_VER
+  - export PATH=$PATH:$PWD/lua_install/bin
+  - eval `luarocks path --bin`
+
+script:
+  # Ubuntu 12.04 has libgcrypt.so installed in /lib, so use that
+  - luarocks make CFLAGS="-O2 -fPIC -Wall -Wextra -Werror --coverage" LIBFLAG="-shared --coverage"
+    LIBGCRYPT_LIBDIR=/lib/x86_64-linux-gnu
+  - lua luagcrypt_test.lua
+
+after_success:
+  - coveralls -e lua_install

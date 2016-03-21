@@ -54,6 +54,18 @@ Another full example to calculate a SHA-256 message digest for standard input:
     -- Extract the hash as hexadecimal value
     print(tohex(md:read()))
 
+Tests
+-----
+The basic test suite requires just libgcrypt and Lua and can be invoked with
+`make check` (which invokes `luagcrypt_test.lua`).
+
+In order to check for code coverage by tests without spoiling your user or
+system paths, invoke:
+
+    HOME=/tmp/rocks make checkcoverage LUAROCKS="luarocks --local" LUA=lua
+
+(The `LUA` variable must match the version used for building with luarocks.)
+
 TODO
 ----
  - Documentation for available functions (other than looking in luagcrypt.c).
