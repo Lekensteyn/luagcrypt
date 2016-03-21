@@ -58,7 +58,6 @@ TODO
 ----
  - Documentation for available functions (other than looking in luagcrypt.c).
  - Expose more API functions and constants as required.
- - Replace/improve the brittle Makefile for cross-platform compatibility.
  - Is the current approach of throwing exceptions acceptable? Or should users
    just check the return value? (Will probably not happen.)
 

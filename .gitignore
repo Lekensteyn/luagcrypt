@@ -1,2 +1,3 @@
 luagcrypt.so
+*.o
 .*.sw?
