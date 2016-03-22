@@ -381,6 +381,7 @@ luaopen_luagcrypt(lua_State *L)
 
     /* https://gnupg.org/documentation/manuals/gcrypt/Available-cipher-modes.html */
     INT_GCRY(CIPHER_MODE_CBC);
+    INT_GCRY(CIPHER_MODE_GCM);
 
     INT_GCRY(MD_FLAG_HMAC);
 

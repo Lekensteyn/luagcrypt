@@ -25,6 +25,7 @@ function test_constants()
     assert(gcrypt.CIPHER_AES192 == 8)
     assert(gcrypt.CIPHER_AES256 == 9)
     assert(gcrypt.CIPHER_MODE_CBC == 3)
+    assert(gcrypt.CIPHER_MODE_GCM == 9)
     assert(gcrypt.MD_SHA256 == 8)
     assert(gcrypt.MD_FLAG_HMAC == 2)
 end
@@ -53,9 +54,12 @@ function test_hmac_sha256()
                              "881dc200c9833da726e9376c2e32cff7"))
 end
 
+-- Check for SHA256 calculation with optional flags parameter and reset.
 function test_sha256()
     -- http://csrc.nist.gov/groups/ST/toolkit/examples.html
     local md = gcrypt.Hash(gcrypt.MD_SHA256)
+    md:write("will be reset")
+    md:reset()
     md:write("ab")
     md:write("c")
     local digest = md:read(gcrypt.MD_SHA256)
@@ -63,12 +67,64 @@ function test_sha256()
                              "b00361a396177a9cb410ff61f20015ad"))
 end
 
+function assert_throws(func, message)
+    local ok, err = pcall(func)
+    if ok then
+        error("Expected \"" .. message .. "\", got no error")
+    end
+    if not string.find(err, message, 1, true) then
+        error("Expected \"" .. message .. "\", got \"" .. err .. "\"")
+    end
+end
+
+function test_cipher_bad()
+    assert_throws(function() gcrypt.Cipher(0, 0) end,
+    "gcry_cipher_open() failed with Invalid cipher algorithm")
+
+    local cipher = gcrypt.Cipher(gcrypt.CIPHER_AES128, gcrypt.CIPHER_MODE_CBC)
+    assert_throws(function() cipher:setkey("") end,
+    "gcry_cipher_setkey() failed with Invalid key length")
+    -- Must normally be a multiple of block size
+    assert_throws(function() cipher:encrypt("x") end,
+    "gcry_cipher_encrypt() failed with Invalid length")
+    assert_throws(function() cipher:decrypt("y") end,
+    "gcry_cipher_decrypt() failed with Invalid length")
+end
+
+function test_aes_gcm_bad()
+    local cipher = gcrypt.Cipher(gcrypt.CIPHER_AES128, gcrypt.CIPHER_MODE_GCM)
+    assert_throws(function() cipher:setiv("") end,
+    "gcry_cipher_setiv() failed with Invalid length")
+end
+
+function test_hash_bad()
+    -- Not all flags are valid, this should trigger an error. Alternatively, one
+    -- can set an invalid algorithm (such as -1), but that generates debug spew.
+    assert_throws(function() gcrypt.Hash(0, -1) end,
+    "gcry_md_open() failed with Invalid argument")
+
+    local md = gcrypt.Hash(gcrypt.MD_SHA256)
+    -- Not called with MD_FLAG_HMAC, so should fail
+    assert_throws(function() md:setkey("X") end,
+    "gcry_md_setkey() failed with Conflicting use")
+    assert_throws(function() md:read(-1) end,
+    "Unable to obtain digest for a disabled algorithm")
+end
+
+function test_init_once()
+    -- TODO is this really desired behavior?
+    assert_throws(function() gcrypt.init() end,
+    "libgcrypt was already initialized")
+end
+
 local all_tests = {
     {"test_constants",      test_constants},
     {"test_aes_cbc_128",    test_aes_cbc_128},
     {"test_hmac_sha256",    test_hmac_sha256},
     {"test_sha256",         test_sha256},
-    -- TODO bad weather tests
+    {"test_cipher_bad",     test_cipher_bad},
+    {"test_aes_gcm_bad",    test_aes_gcm_bad},
+    {"test_hash_bad",       test_hash_bad},
 }
 
 function main()
