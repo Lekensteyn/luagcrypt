@@ -25,6 +25,7 @@ function test_constants()
     assert(gcrypt.CIPHER_AES192 == 8)
     assert(gcrypt.CIPHER_AES256 == 9)
     assert(gcrypt.CIPHER_MODE_CBC == 3)
+    assert(gcrypt.CIPHER_MODE_CTR == 6)
     assert(gcrypt.CIPHER_MODE_GCM == 9)
     assert(gcrypt.MD_SHA256 == 8)
     assert(gcrypt.MD_FLAG_HMAC == 2)
@@ -42,6 +43,31 @@ function test_aes_cbc_128()
     cipher:setiv(fromhex("3dafba429d9eb430b422da802c9fac41"))
     local plaintext = cipher:decrypt(fromhex("e353779c1079aeb82708942dbe77181a"))
     assert(plaintext == "Single block msg")
+end
+
+function test_aes_ctr_192()
+    -- RFC 3686 -- 6. Test Vectors (Test Vector #6)
+    local counter_iv_one = fromhex("0007bdfd5cbd60278dcc091200000001")
+    local plaintexts = {
+        fromhex("000102030405060708090a0b0c0d0e0f"),
+        fromhex("101112131415161718191a1b1c1d1e1f"),
+        fromhex("20212223")
+    }
+    local ciphertexts = {
+        fromhex("96893fc55e5c722f540b7dd1ddf7e758"),
+        fromhex("d288bc95c69165884536c811662f2188"),
+        fromhex("abee0935")
+    }
+    local cipher = gcrypt.Cipher(gcrypt.CIPHER_AES192, gcrypt.CIPHER_MODE_CTR)
+    cipher:setkey(fromhex("02bf391ee8ecb159b959617b0965279bf59b60a786d3e0fe"))
+    cipher:setctr(counter_iv_one)
+    assert(cipher:encrypt(plaintexts[1]) == ciphertexts[1])
+    assert(cipher:encrypt(plaintexts[2]) == ciphertexts[2])
+    assert(cipher:encrypt(plaintexts[3]) == ciphertexts[3])
+    cipher:setctr(counter_iv_one)
+    assert(cipher:decrypt(ciphertexts[1]) == plaintexts[1])
+    assert(cipher:decrypt(ciphertexts[2]) == plaintexts[2])
+    assert(cipher:decrypt(ciphertexts[3]) == plaintexts[3])
 end
 
 function test_hmac_sha256()
@@ -91,6 +117,13 @@ function test_cipher_bad()
     "gcry_cipher_decrypt() failed with Invalid length")
 end
 
+function test_aes_ctr_bad()
+    local cipher = gcrypt.Cipher(gcrypt.CIPHER_AES128, gcrypt.CIPHER_MODE_CTR)
+    -- Counter must be a multiple of block size
+    assert_throws(function() cipher:setctr("x") end,
+    "gcry_cipher_setctr() failed with Invalid argument")
+end
+
 function test_aes_gcm_bad()
     local cipher = gcrypt.Cipher(gcrypt.CIPHER_AES128, gcrypt.CIPHER_MODE_GCM)
     assert_throws(function() cipher:setiv("") end,
@@ -120,9 +153,11 @@ end
 local all_tests = {
     {"test_constants",      test_constants},
     {"test_aes_cbc_128",    test_aes_cbc_128},
+    {"test_aes_ctr_192",    test_aes_ctr_192},
     {"test_hmac_sha256",    test_hmac_sha256},
     {"test_sha256",         test_sha256},
     {"test_cipher_bad",     test_cipher_bad},
+    {"test_aes_gcm_bad",    test_aes_ctr_bad},
     {"test_aes_gcm_bad",    test_aes_gcm_bad},
     {"test_hash_bad",       test_hash_bad},
 }

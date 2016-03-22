@@ -124,6 +124,21 @@ lgcrypt_cipher_setiv(lua_State *L)
 }
 
 static int
+lgcrypt_cipher_setctr(lua_State *L)
+{
+    LgcryptCipher *state = checkCipher(L, 1);
+    size_t ctr_len;
+    const char *ctr = luaL_checklstring(L, 2, &ctr_len);
+    gcry_error_t err;
+
+    err = gcry_cipher_setctr(state->h, ctr, ctr_len);
+    if (err != GPG_ERR_NO_ERROR) {
+        luaL_error(L, "gcry_cipher_setctr() failed with %s", gcry_strerror(err));
+    }
+    return 0;
+}
+
+static int
 lgcrypt_cipher_reset(lua_State *L)
 {
     LgcryptCipher *state = checkCipher(L, 1);
@@ -196,6 +211,7 @@ static const struct luaL_Reg lgcrypt_cipher_meta[] = {
     {"__gc",    lgcrypt_cipher___gc},
     {"setkey",  lgcrypt_cipher_setkey},
     {"setiv",   lgcrypt_cipher_setiv},
+    {"setctr",  lgcrypt_cipher_setctr},
     {"reset",   lgcrypt_cipher_reset},
     {"encrypt", lgcrypt_cipher_encrypt},
     {"decrypt", lgcrypt_cipher_decrypt},
@@ -381,6 +397,7 @@ luaopen_luagcrypt(lua_State *L)
 
     /* https://gnupg.org/documentation/manuals/gcrypt/Available-cipher-modes.html */
     INT_GCRY(CIPHER_MODE_CBC);
+    INT_GCRY(CIPHER_MODE_CTR);
     INT_GCRY(CIPHER_MODE_GCM);
 
     INT_GCRY(MD_FLAG_HMAC);
