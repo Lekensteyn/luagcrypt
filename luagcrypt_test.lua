@@ -27,7 +27,9 @@ function test_constants()
     assert(gcrypt.CIPHER_MODE_ECB == 1)
     assert(gcrypt.CIPHER_MODE_CBC == 3)
     assert(gcrypt.CIPHER_MODE_CTR == 6)
-    assert(gcrypt.CIPHER_MODE_GCM == 9)
+    if not skip_aead then
+        assert(gcrypt.CIPHER_MODE_GCM == 9)
+    end
     assert(gcrypt.MD_SHA256 == 8)
     assert(gcrypt.MD_FLAG_HMAC == 2)
 end
@@ -72,6 +74,7 @@ function test_aes_ctr_192()
 end
 
 function test_aes_gcm_128()
+    if skip_aead then print("...skipped") return end
     -- http://csrc.nist.gov/groups/ST/toolkit/BCM/documents/proposedmodes/gcm/gcm-revised-spec.pdf
     -- Test case 4
     local plaintext_spec = fromhex("d9313225f88406e5a55909c5aff5269a" ..
@@ -143,9 +146,12 @@ function test_cipher_bad()
     "gcry_cipher_encrypt() failed with Invalid length")
     assert_throws(function() cipher:decrypt("y") end,
     "gcry_cipher_decrypt() failed with Invalid length")
+end
 
+function test_cipher_gettag()
+    if skip_aead then print("...skipped") return end
     -- ECB has no tag, it should not succeed
-    cipher = gcrypt.Cipher(gcrypt.CIPHER_AES128, gcrypt.CIPHER_MODE_ECB)
+    local cipher = gcrypt.Cipher(gcrypt.CIPHER_AES128, gcrypt.CIPHER_MODE_ECB)
     assert_throws(function() cipher:gettag() end,
     "Unsupported cipher mode")
 end
@@ -158,6 +164,7 @@ function test_aes_ctr_bad()
 end
 
 function test_aes_gcm_bad()
+    if skip_aead then print("...skipped") return end
     local cipher = gcrypt.Cipher(gcrypt.CIPHER_AES128, gcrypt.CIPHER_MODE_GCM)
     assert_throws(function() cipher:setiv("") end,
     "gcry_cipher_setiv() failed with Invalid length")
@@ -193,12 +200,16 @@ local all_tests = {
     {"test_hmac_sha256",    test_hmac_sha256},
     {"test_sha256",         test_sha256},
     {"test_cipher_bad",     test_cipher_bad},
-    {"test_aes_gcm_bad",    test_aes_ctr_bad},
+    {"test_cipher_gettag",  test_cipher_gettag},
+    {"test_aes_ctr_bad",    test_aes_ctr_bad},
     {"test_aes_gcm_bad",    test_aes_gcm_bad},
     {"test_hash_bad",       test_hash_bad},
 }
 
 function main()
+    -- Older libgcrypt do not provide this interface :-(
+    if not gcrypt.CIPHER_MODE_GCM then skip_aead = true end
+
     for k, v in pairs(all_tests) do
         local name, test = v[1], v[2]
         print("Running " .. name .. "...")
