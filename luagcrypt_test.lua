@@ -24,6 +24,7 @@ function test_constants()
     assert(gcrypt.CIPHER_AES128 == 7)
     assert(gcrypt.CIPHER_AES192 == 8)
     assert(gcrypt.CIPHER_AES256 == 9)
+    assert(gcrypt.CIPHER_MODE_ECB == 1)
     assert(gcrypt.CIPHER_MODE_CBC == 3)
     assert(gcrypt.CIPHER_MODE_CTR == 6)
     assert(gcrypt.CIPHER_MODE_GCM == 9)
@@ -89,6 +90,7 @@ function test_aes_gcm_128()
     cipher:setiv(iv)
     cipher:authenticate(adata)
     assert(cipher:encrypt(plaintext_spec) == ciphertext_spec)
+    assert(cipher:gettag() == atag)
     cipher:checktag(atag)
 
     cipher:reset()
@@ -141,6 +143,11 @@ function test_cipher_bad()
     "gcry_cipher_encrypt() failed with Invalid length")
     assert_throws(function() cipher:decrypt("y") end,
     "gcry_cipher_decrypt() failed with Invalid length")
+
+    -- ECB has no tag, it should not succeed
+    cipher = gcrypt.Cipher(gcrypt.CIPHER_AES128, gcrypt.CIPHER_MODE_ECB)
+    assert_throws(function() cipher:gettag() end,
+    "Unsupported cipher mode")
 end
 
 function test_aes_ctr_bad()

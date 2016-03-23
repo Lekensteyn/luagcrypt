@@ -35,6 +35,7 @@ luaL_setfuncs(lua_State *L, const luaL_Reg *l, int nup)
 /* {{{ Symmetric encryption */
 typedef struct {
     gcry_cipher_hd_t h;
+    int mode;           /* Cipher mode */
     unsigned char *out; /* temporary to avoid resource leaks on error paths */
 } LgcryptCipher;
 
@@ -46,6 +47,7 @@ lgcrypt_cipher_new(lua_State *L)
 
     state = (LgcryptCipher *) lua_newuserdata(L, sizeof(LgcryptCipher));
     state->h = NULL;
+    state->mode = 0;
     state->out = NULL;
     luaL_getmetatable(L, "gcrypt.Cipher");
     lua_setmetatable(L, -2);
@@ -63,6 +65,7 @@ lgcrypt_cipher_open(lua_State *L)
     mode = luaL_checkint(L, 2);
 
     state = lgcrypt_cipher_new(L);
+    state->mode = mode;
 
     err = gcry_cipher_open(&state->h, algo, mode, 0);
     if (err != GPG_ERR_NO_ERROR) {
@@ -166,6 +169,46 @@ lgcrypt_cipher_authenticate(lua_State *L)
     return 0;
 }
 
+/* libgcrypt 1.6.5 has some quirks
+ * https://lists.gnupg.org/pipermail/gcrypt-devel/2016-March/003754.html */
+static size_t
+get_tag_length(LgcryptCipher *state)
+{
+    switch (state->mode) {
+    case GCRY_CIPHER_MODE_GCM:
+        return 16;
+#if 0
+    case GCRY_CIPHER_MODE_POLY1305:
+        return 16;
+    /* OCB can have 8, 12 or 16 depending on the parameter set (RFC 7253 3.1) */
+    case GCRY_CIPHER_MODE_OCB:
+        return 16;
+#endif
+    default:
+        return 0;
+    }
+}
+
+static int
+lgcrypt_cipher_gettag(lua_State *L)
+{
+    LgcryptCipher *state = checkCipher(L, 1);
+    char tag[16];
+    size_t tag_len;
+    gcry_error_t err;
+
+    tag_len = get_tag_length(state);
+    if (tag_len == 0) {
+        luaL_error(L, "Unsupported cipher mode");
+    }
+    err = gcry_cipher_gettag(state->h, tag, tag_len);
+    if (err != GPG_ERR_NO_ERROR) {
+        luaL_error(L, "gcry_cipher_gettag() failed with %s", gcry_strerror(err));
+    }
+    lua_pushlstring(L, tag, tag_len);
+    return 1;
+}
+
 static int
 lgcrypt_cipher_checktag(lua_State *L)
 {
@@ -244,6 +287,7 @@ static const struct luaL_Reg lgcrypt_cipher_meta[] = {
     {"setctr",          lgcrypt_cipher_setctr},
     {"reset",           lgcrypt_cipher_reset},
     {"authenticate",    lgcrypt_cipher_authenticate},
+    {"gettag",          lgcrypt_cipher_gettag},
     {"checktag",        lgcrypt_cipher_checktag},
     {"encrypt",         lgcrypt_cipher_encrypt},
     {"decrypt",         lgcrypt_cipher_decrypt},
@@ -428,6 +472,7 @@ luaopen_luagcrypt(lua_State *L)
     INT_GCRY(CIPHER_AES256);
 
     /* https://gnupg.org/documentation/manuals/gcrypt/Available-cipher-modes.html */
+    INT_GCRY(CIPHER_MODE_ECB);
     INT_GCRY(CIPHER_MODE_CBC);
     INT_GCRY(CIPHER_MODE_CTR);
     INT_GCRY(CIPHER_MODE_GCM);
