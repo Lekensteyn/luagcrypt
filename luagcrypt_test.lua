@@ -70,6 +70,32 @@ function test_aes_ctr_192()
     assert(cipher:decrypt(ciphertexts[3]) == plaintexts[3])
 end
 
+function test_aes_gcm_128()
+    -- http://csrc.nist.gov/groups/ST/toolkit/BCM/documents/proposedmodes/gcm/gcm-revised-spec.pdf
+    -- Test case 4
+    local plaintext_spec = fromhex("d9313225f88406e5a55909c5aff5269a" ..
+                                   "86a7a9531534f7da2e4c303d8a318a72" ..
+                                   "1c3c0c95956809532fcf0e2449a6b525" ..
+                                   "b16aedf5aa0de657ba637b39")
+    local ciphertext_spec = fromhex("42831ec2217774244b7221b784d0d49c" ..
+                                    "e3aa212f2c02a4e035c17e2329aca12e" ..
+                                    "21d514b25466931c7d8f6a5aac84aa05" ..
+                                    "1ba30b396a0aac973d58e091")
+    local adata = fromhex("feedfacedeadbeeffeedfacedeadbeefabaddad2")
+    local atag = fromhex("5bc94fbc3221a5db94fae95ae7121a47")
+    local iv = fromhex("cafebabefacedbaddecaf888")
+    local cipher = gcrypt.Cipher(gcrypt.CIPHER_AES128, gcrypt.CIPHER_MODE_GCM)
+    cipher:setkey(fromhex("feffe9928665731c6d6a8f9467308308"))
+    cipher:setiv(iv)
+    cipher:authenticate(adata)
+    assert(cipher:encrypt(plaintext_spec) == ciphertext_spec)
+    cipher:checktag(atag)
+
+    cipher:reset()
+    cipher:setiv(iv)
+    assert(cipher:decrypt(ciphertext_spec) == plaintext_spec)
+end
+
 function test_hmac_sha256()
     -- RFC 4231 -- 4.2. Test Case 1
     local md = gcrypt.Hash(gcrypt.MD_SHA256, gcrypt.MD_FLAG_HMAC)
@@ -156,6 +182,7 @@ local all_tests = {
     {"test_constants",      test_constants},
     {"test_aes_cbc_128",    test_aes_cbc_128},
     {"test_aes_ctr_192",    test_aes_ctr_192},
+    {"test_aes_gcm_128",    test_aes_gcm_128},
     {"test_hmac_sha256",    test_hmac_sha256},
     {"test_sha256",         test_sha256},
     {"test_cipher_bad",     test_cipher_bad},

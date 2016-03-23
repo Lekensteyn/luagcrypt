@@ -152,6 +152,36 @@ lgcrypt_cipher_reset(lua_State *L)
 }
 
 static int
+lgcrypt_cipher_authenticate(lua_State *L)
+{
+    LgcryptCipher *state = checkCipher(L, 1);
+    size_t abuf_len;
+    const char *abuf = luaL_checklstring(L, 2, &abuf_len);
+    gcry_error_t err;
+
+    err = gcry_cipher_authenticate(state->h, abuf, abuf_len);
+    if (err != GPG_ERR_NO_ERROR) {
+        luaL_error(L, "gcry_cipher_authenticate() failed with %s", gcry_strerror(err));
+    }
+    return 0;
+}
+
+static int
+lgcrypt_cipher_checktag(lua_State *L)
+{
+    LgcryptCipher *state = checkCipher(L, 1);
+    size_t tag_len;
+    const char *tag = luaL_checklstring(L, 2, &tag_len);
+    gcry_error_t err;
+
+    err = gcry_cipher_checktag(state->h, tag, tag_len);
+    if (err != GPG_ERR_NO_ERROR) {
+        luaL_error(L, "gcry_cipher_checktag() failed with %s", gcry_strerror(err));
+    }
+    return 0;
+}
+
+static int
 lgcrypt_cipher_encrypt(lua_State *L)
 {
     LgcryptCipher *state = checkCipher(L, 1);
@@ -208,14 +238,16 @@ lgcrypt_cipher_decrypt(lua_State *L)
 
 /* https://gnupg.org/documentation/manuals/gcrypt/Working-with-cipher-handles.html */
 static const struct luaL_Reg lgcrypt_cipher_meta[] = {
-    {"__gc",    lgcrypt_cipher___gc},
-    {"setkey",  lgcrypt_cipher_setkey},
-    {"setiv",   lgcrypt_cipher_setiv},
-    {"setctr",  lgcrypt_cipher_setctr},
-    {"reset",   lgcrypt_cipher_reset},
-    {"encrypt", lgcrypt_cipher_encrypt},
-    {"decrypt", lgcrypt_cipher_decrypt},
-    {NULL,      NULL}
+    {"__gc",            lgcrypt_cipher___gc},
+    {"setkey",          lgcrypt_cipher_setkey},
+    {"setiv",           lgcrypt_cipher_setiv},
+    {"setctr",          lgcrypt_cipher_setctr},
+    {"reset",           lgcrypt_cipher_reset},
+    {"authenticate",    lgcrypt_cipher_authenticate},
+    {"checktag",        lgcrypt_cipher_checktag},
+    {"encrypt",         lgcrypt_cipher_encrypt},
+    {"decrypt",         lgcrypt_cipher_decrypt},
+    {NULL,              NULL}
 };
 /* }}} */
 /* {{{ Message digests */
