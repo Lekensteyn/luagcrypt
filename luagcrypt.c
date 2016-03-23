@@ -154,6 +154,7 @@ lgcrypt_cipher_reset(lua_State *L)
     return 0;
 }
 
+#if GCRYPT_VERSION_NUMBER >= 0x010600
 static int
 lgcrypt_cipher_authenticate(lua_State *L)
 {
@@ -223,6 +224,7 @@ lgcrypt_cipher_checktag(lua_State *L)
     }
     return 0;
 }
+#endif
 
 static int
 lgcrypt_cipher_encrypt(lua_State *L)
@@ -286,9 +288,11 @@ static const struct luaL_Reg lgcrypt_cipher_meta[] = {
     {"setiv",           lgcrypt_cipher_setiv},
     {"setctr",          lgcrypt_cipher_setctr},
     {"reset",           lgcrypt_cipher_reset},
+#if GCRYPT_VERSION_NUMBER >= 0x010600
     {"authenticate",    lgcrypt_cipher_authenticate},
     {"gettag",          lgcrypt_cipher_gettag},
     {"checktag",        lgcrypt_cipher_checktag},
+#endif
     {"encrypt",         lgcrypt_cipher_encrypt},
     {"decrypt",         lgcrypt_cipher_decrypt},
     {NULL,              NULL}
@@ -475,7 +479,9 @@ luaopen_luagcrypt(lua_State *L)
     INT_GCRY(CIPHER_MODE_ECB);
     INT_GCRY(CIPHER_MODE_CBC);
     INT_GCRY(CIPHER_MODE_CTR);
+#if GCRYPT_VERSION_NUMBER >= 0x010600
     INT_GCRY(CIPHER_MODE_GCM);
+#endif
 
     INT_GCRY(MD_FLAG_HMAC);
 
