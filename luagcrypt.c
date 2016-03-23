@@ -27,7 +27,7 @@ luaL_setfuncs(lua_State *L, const luaL_Reg *l, int nup)
 #define luaL_newlibtable(L,l)   lua_createtable(L, 0, sizeof(l)/sizeof*(l) - 1)
 #define luaL_newlib(L,l)        (luaL_newlibtable(L,l), luaL_setfuncs(L,l,0))
 #endif
-#if LUA_VERSION_NUM >= 503
+#ifndef luaL_checkint
 #define luaL_checkint(L,n)      ((int)luaL_checkinteger(L,n))
 #endif
 /* }}} */
