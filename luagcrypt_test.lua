@@ -204,6 +204,7 @@ local all_tests = {
     {"test_aes_ctr_bad",    test_aes_ctr_bad},
     {"test_aes_gcm_bad",    test_aes_gcm_bad},
     {"test_hash_bad",       test_hash_bad},
+    {"test_init_once",      test_init_once},
 }
 
 function main()
