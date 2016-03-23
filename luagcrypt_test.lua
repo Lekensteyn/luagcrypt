@@ -138,8 +138,10 @@ function test_hash_bad()
 
     local md = gcrypt.Hash(gcrypt.MD_SHA256)
     -- Not called with MD_FLAG_HMAC, so should fail
+    -- 1.6.5: "Conflicting use".
+    -- 1.7.0: "Invalid digest algorithm"
     assert_throws(function() md:setkey("X") end,
-    "gcry_md_setkey() failed with Conflicting use")
+    "gcry_md_setkey() failed with ")
     assert_throws(function() md:read(-1) end,
     "Unable to obtain digest for a disabled algorithm")
 end
