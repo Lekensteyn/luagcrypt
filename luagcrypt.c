@@ -36,7 +36,6 @@ luaL_setfuncs(lua_State *L, const luaL_Reg *l, int nup)
 typedef struct {
     gcry_cipher_hd_t h;
     int mode;           /* Cipher mode */
-    unsigned char *out; /* temporary to avoid resource leaks on error paths */
 } LgcryptCipher;
 
 /* Initializes a new gcrypt.Cipher userdata and pushes it on the stack. */
@@ -48,7 +47,6 @@ lgcrypt_cipher_new(lua_State *L)
     state = (LgcryptCipher *) lua_newuserdata(L, sizeof(LgcryptCipher));
     state->h = NULL;
     state->mode = 0;
-    state->out = NULL;
     luaL_getmetatable(L, "gcrypt.Cipher");
     lua_setmetatable(L, -2);
     return state;
@@ -99,10 +97,6 @@ lgcrypt_cipher___gc(lua_State *L)
     if (state->h) {
         gcry_cipher_close(state->h);
         state->h = NULL;
-    }
-    if (state->out) {
-        gcry_free(state->out);
-        state->out = NULL;
     }
     return 0;
 }
@@ -242,24 +236,19 @@ lgcrypt_cipher_encrypt(lua_State *L)
     LgcryptCipher *state = checkCipher(L, 1);
     size_t in_len, out_len;
     const char *in;
+    char *out;
     gcry_error_t err;
 
     in = luaL_checklstring(L, 2, &in_len);
 
     out_len = in_len;
-    state->out = gcry_malloc(out_len);
-    if (!state->out) {
-        luaL_error(L, "Failed to allocate memory for ciphertext");
-    }
-    err = gcry_cipher_encrypt(state->h, state->out, out_len, in, in_len);
+    out = lua_newuserdata(L, out_len);
+    err = gcry_cipher_encrypt(state->h, out, out_len, in, in_len);
     if (err != GPG_ERR_NO_ERROR) {
-        gcry_free(state->out);
-        state->out = NULL;
         luaL_error(L, "gcry_cipher_encrypt() failed with %s", gcry_strerror(err));
     }
-    lua_pushlstring(L, (const char *)state->out, out_len);
-    gcry_free(state->out);
-    state->out = NULL;
+    lua_pushlstring(L, out, out_len);
+    lua_remove(L, -2);
     return 1;
 }
 
@@ -269,24 +258,19 @@ lgcrypt_cipher_decrypt(lua_State *L)
     LgcryptCipher *state = checkCipher(L, 1);
     size_t in_len, out_len;
     const char *in;
+    char *out;
     gcry_error_t err;
 
     in = luaL_checklstring(L, 2, &in_len);
 
     out_len = in_len;
-    state->out = gcry_malloc(out_len);
-    if (!state->out) {
-        luaL_error(L, "Failed to allocate memory for plaintext");
-    }
-    err = gcry_cipher_decrypt(state->h, state->out, out_len, in, in_len);
+    out = lua_newuserdata(L, out_len);
+    err = gcry_cipher_decrypt(state->h, out, out_len, in, in_len);
     if (err != GPG_ERR_NO_ERROR) {
-        gcry_free(state->out);
-        state->out = NULL;
         luaL_error(L, "gcry_cipher_decrypt() failed with %s", gcry_strerror(err));
     }
-    lua_pushlstring(L, (const char *)state->out, out_len);
-    gcry_free(state->out);
-    state->out = NULL;
+    lua_pushlstring(L, out, out_len);
+    lua_remove(L, -2);
     return 1;
 }
 
