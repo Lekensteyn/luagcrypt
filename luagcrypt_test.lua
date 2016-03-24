@@ -146,6 +146,11 @@ function test_cipher_bad()
     "gcry_cipher_encrypt() failed with Invalid length")
     assert_throws(function() cipher:decrypt("y") end,
     "gcry_cipher_decrypt() failed with Invalid length")
+    -- Should not segfault.
+    cipher:__gc()
+    cipher:__gc()
+    assert_throws(function() cipher:reset() end,
+    "Called into a dead object")
 end
 
 function test_cipher_gettag()
@@ -184,6 +189,11 @@ function test_hash_bad()
     "gcry_md_setkey() failed with ")
     assert_throws(function() md:read(-1) end,
     "Unable to obtain digest for a disabled algorithm")
+    -- Should not segfault.
+    md:__gc()
+    md:__gc()
+    assert_throws(function() md:reset() end,
+    "Called into a dead object")
 end
 
 function test_init_once()

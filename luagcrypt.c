@@ -76,21 +76,33 @@ lgcrypt_cipher_open(lua_State *L)
 }
 
 static LgcryptCipher *
-checkCipher(lua_State *L, int arg)
+getCipher(lua_State *L, int arg)
 {
     return (LgcryptCipher *)luaL_checkudata(L, arg, "gcrypt.Cipher");
+}
+
+static LgcryptCipher *
+checkCipher(lua_State *L, int arg)
+{
+    LgcryptCipher *state = getCipher(L, arg);
+    if (!state->h) {
+        luaL_error(L, "Called into a dead object");
+    }
+    return state;
 }
 
 static int
 lgcrypt_cipher___gc(lua_State *L)
 {
-    LgcryptCipher *state = checkCipher(L, 1);
+    LgcryptCipher *state = getCipher(L, 1);
 
     if (state->h) {
         gcry_cipher_close(state->h);
+        state->h = NULL;
     }
     if (state->out) {
         gcry_free(state->out);
+        state->out = NULL;
     }
     return 0;
 }
@@ -338,18 +350,29 @@ lgcrypt_hash_open(lua_State *L)
 }
 
 static LgcryptHash *
-checkHash(lua_State *L, int arg)
+getHash(lua_State *L, int arg)
 {
     return (LgcryptHash *)luaL_checkudata(L, arg, "gcrypt.Hash");
+}
+
+static LgcryptHash *
+checkHash(lua_State *L, int arg)
+{
+    LgcryptHash *state = getHash(L, arg);
+    if (!state->h) {
+        luaL_error(L, "Called into a dead object");
+    }
+    return state;
 }
 
 static int
 lgcrypt_hash___gc(lua_State *L)
 {
-    LgcryptHash *state = checkHash(L, 1);
+    LgcryptHash *state = getHash(L, 1);
 
     if (state->h) {
         gcry_md_close(state->h);
+        state->h = NULL;
     }
     return 0;
 }
