@@ -66,7 +66,7 @@ lgcrypt_cipher_open(lua_State *L)
     state->mode = mode;
 
     err = gcry_cipher_open(&state->h, algo, mode, 0);
-    if (err != GPG_ERR_NO_ERROR) {
+    if (err) {
         lua_pop(L, 1);
         luaL_error(L, "gcry_cipher_open() failed with %s", gcry_strerror(err));
     }
@@ -111,7 +111,7 @@ lgcrypt_cipher_setkey(lua_State *L)
     gcry_error_t err;
 
     err = gcry_cipher_setkey(state->h, key, key_len);
-    if (err != GPG_ERR_NO_ERROR) {
+    if (err) {
         luaL_error(L, "gcry_cipher_setkey() failed with %s", gcry_strerror(err));
     }
     return 0;
@@ -126,7 +126,7 @@ lgcrypt_cipher_setiv(lua_State *L)
     gcry_error_t err;
 
     err = gcry_cipher_setiv(state->h, iv, iv_len);
-    if (err != GPG_ERR_NO_ERROR) {
+    if (err) {
         luaL_error(L, "gcry_cipher_setiv() failed with %s", gcry_strerror(err));
     }
     return 0;
@@ -141,7 +141,7 @@ lgcrypt_cipher_setctr(lua_State *L)
     gcry_error_t err;
 
     err = gcry_cipher_setctr(state->h, ctr, ctr_len);
-    if (err != GPG_ERR_NO_ERROR) {
+    if (err) {
         luaL_error(L, "gcry_cipher_setctr() failed with %s", gcry_strerror(err));
     }
     return 0;
@@ -154,7 +154,7 @@ lgcrypt_cipher_reset(lua_State *L)
     gcry_error_t err;
 
     err = gcry_cipher_reset(state->h);
-    if (err != GPG_ERR_NO_ERROR) {
+    if (err) {
         luaL_error(L, "gcry_cipher_reset() failed with %s", gcry_strerror(err));
     }
     return 0;
@@ -170,7 +170,7 @@ lgcrypt_cipher_authenticate(lua_State *L)
     gcry_error_t err;
 
     err = gcry_cipher_authenticate(state->h, abuf, abuf_len);
-    if (err != GPG_ERR_NO_ERROR) {
+    if (err) {
         luaL_error(L, "gcry_cipher_authenticate() failed with %s", gcry_strerror(err));
     }
     return 0;
@@ -186,7 +186,7 @@ get_tag_length(LgcryptCipher *state)
     gcry_error_t err;
 
     err = gcry_cipher_info(state->h, GCRYCTL_GET_TAGLEN, NULL, &nbytes);
-    return err == GPG_ERR_NO_ERROR ? nbytes : 0;
+    return !err ? nbytes : 0;
 #else
     return state->mode == GCRY_CIPHER_MODE_GCM ? 16 : 0;
 #endif
@@ -205,7 +205,7 @@ lgcrypt_cipher_gettag(lua_State *L)
         luaL_error(L, "Unsupported cipher mode");
     }
     err = gcry_cipher_gettag(state->h, tag, tag_len);
-    if (err != GPG_ERR_NO_ERROR) {
+    if (err) {
         luaL_error(L, "gcry_cipher_gettag() failed with %s", gcry_strerror(err));
     }
     lua_pushlstring(L, tag, tag_len);
@@ -221,7 +221,7 @@ lgcrypt_cipher_checktag(lua_State *L)
     gcry_error_t err;
 
     err = gcry_cipher_checktag(state->h, tag, tag_len);
-    if (err != GPG_ERR_NO_ERROR) {
+    if (err) {
         luaL_error(L, "gcry_cipher_checktag() failed with %s", gcry_strerror(err));
     }
     return 0;
@@ -242,7 +242,7 @@ lgcrypt_cipher_encrypt(lua_State *L)
     out_len = in_len;
     out = lua_newuserdata(L, out_len);
     err = gcry_cipher_encrypt(state->h, out, out_len, in, in_len);
-    if (err != GPG_ERR_NO_ERROR) {
+    if (err) {
         luaL_error(L, "gcry_cipher_encrypt() failed with %s", gcry_strerror(err));
     }
     lua_pushlstring(L, out, out_len);
@@ -264,7 +264,7 @@ lgcrypt_cipher_decrypt(lua_State *L)
     out_len = in_len;
     out = lua_newuserdata(L, out_len);
     err = gcry_cipher_decrypt(state->h, out, out_len, in, in_len);
-    if (err != GPG_ERR_NO_ERROR) {
+    if (err) {
         luaL_error(L, "gcry_cipher_decrypt() failed with %s", gcry_strerror(err));
     }
     lua_pushlstring(L, out, out_len);
@@ -322,7 +322,7 @@ lgcrypt_hash_open(lua_State *L)
     state = lgcrypt_hash_new(L);
 
     err = gcry_md_open(&state->h, algo, flags);
-    if (err != GPG_ERR_NO_ERROR) {
+    if (err) {
         lua_pop(L, 1);
         luaL_error(L, "gcry_md_open() failed with %s", gcry_strerror(err));
     }
@@ -367,7 +367,7 @@ lgcrypt_hash_setkey(lua_State *L)
     gcry_error_t err;
 
     err = gcry_md_setkey(state->h, key, key_len);
-    if (err != GPG_ERR_NO_ERROR) {
+    if (err) {
         luaL_error(L, "gcry_md_setkey() failed with %s", gcry_strerror(err));
     }
     return 0;
