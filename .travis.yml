@@ -14,16 +14,28 @@ env:
   - LUA=lua     LUA_VER=5.2 libgcrypt=20
   - LUA=lua     LUA_VER=5.3 libgcrypt=20
 
+matrix:
+  include:
+    - os: osx
+      osx_image: xcode7.2
+      env: LUA=lua LUA_VER=5.2
+
 before_install:
-  - sudo apt-get -qq update
-  - sudo apt-get install -y libgcrypt${libgcrypt}-dev
+  - if [ "$TRAVIS_OS_NAME" = linux ]; then sudo apt-get -qq update; fi
+  - if [ "$TRAVIS_OS_NAME" = linux ]; then sudo apt-get install -y libgcrypt${libgcrypt}-dev; fi
+  - if [ "$TRAVIS_OS_NAME" = osx ]; then brew update; fi
+  - if [ "$TRAVIS_OS_NAME" = osx ]; then brew install libgcrypt; fi
+  - if [ "$TRAVIS_OS_NAME" = osx ]; then sudo easy_install pip; fi
+  - if [ "$TRAVIS_OS_NAME" = osx ]; then export PATH=~/Library/Python/2.7/bin:$PATH; fi
   - pip install --user hererocks cpp-coveralls
   - hererocks lua_install -r^ --$LUA $LUA_VER
   - export PATH=$PATH:$PWD/lua_install/bin
   - eval `luarocks path --bin`
 
 script:
-  - luarocks make CFLAGS="-O2 -fPIC -Wall -Wextra -Werror --coverage" LIBFLAG="-shared --coverage"
+  - if [ "$TRAVIS_OS_NAME" = linux ]; then LIBFLAG=-shared; fi
+  - if [ "$TRAVIS_OS_NAME" = osx ]; then LIBFLAG="-bundle -undefined dynamic_lookup -all_load"; fi
+  - luarocks make CFLAGS="-O2 -fPIC -Wall -Wextra -Werror --coverage" LIBFLAG="$LIBFLAG --coverage"
   - lua luagcrypt_test.lua
 
 after_success:
