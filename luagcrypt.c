@@ -186,9 +186,7 @@ get_tag_length(LgcryptCipher *state)
     gcry_error_t err;
 
     err = gcry_cipher_info(state->h, GCRYCTL_GET_TAGLEN, NULL, &nbytes);
-    if (err == GPG_ERR_NO_ERROR) {
-        return nbytes;
-    }
+    return err == GPG_ERR_NO_ERROR ? nbytes : 0;
 #else
     return state->mode == GCRY_CIPHER_MODE_GCM ? 16 : 0;
 #endif
