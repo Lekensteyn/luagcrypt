@@ -7,8 +7,14 @@ LUA_LIBDIR  = $(LUA_DIR)/lib/lua/$(LUA_VER)
 
 CFLAGS      = -Wall -Wextra -Werror=implicit-function-declaration
 CFLAGS     += -O2 -g -I$(LUA_INCDIR)
-LIBFLAG     = -shared
 LDFLAGS     = -lgcrypt -lgpg-error
+
+OS          = $(shell uname)
+ifeq ($(OS), Darwin)
+LIBFLAG     = -bundle -undefined dynamic_lookup -all_load
+else
+LIBFLAG     = -shared
+endif
 
 luagcrypt.so: luagcrypt.c
 	@if test ! -e $(LUA_INCDIR)/lua.h; then \
