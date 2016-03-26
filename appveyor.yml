@@ -1,0 +1,40 @@
+version: 0.0.{build}
+image: Visual Studio 2013
+init:
+  - cmd: '"C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat" x64'
+environment:
+  LUA: lua
+  LUA_VER: 5.2
+  # Wireshark's libs include libgcrypt 1.6.2
+  GCRYPT_NAME: gnutls-3.2.15-2.9-win64ws
+install:
+  - ps: |-
+      if (-Not (Test-Path "C:\$Env:GCRYPT_NAME\bin")) {
+        & svn export https://anonsvn.wireshark.org/wireshark-win64-libs/trunk/packages/$Env:GCRYPT_NAME.zip
+        if (-Not $?) { throw "svn failed with $?" }
+        & 7z x -aoa -oC:\ "$Env:GCRYPT_NAME.zip" `
+             "-ir!gpg-error.h"       "-ir!gcrypt.h" `
+          "-ir!libgpg-error*.lib" "-ir!libgcrypt*.lib" `
+          "-ir!libgpg-error*.dll" "-ir!libgcrypt*.dll"
+        if (-Not $?) { throw "7z failed with $?" }
+      }
+  - cmd: PATH C:\Python35\Scripts;%PATH%
+  - ps: |-
+      $dir="C:\$Env:LUA\$Env:LUA_VER"
+      if (-Not (Test-Path "$dir\bin\lua.exe")) {
+        & pip --disable-pip-version-check install https://github.com/Lekensteyn/hererocks/archive/windows.zip
+        if (-Not $?) { throw "pip failed with $?" }
+        & hererocks "$dir" -r^ --$Env:LUA $Env:LUA_VER
+        if (-Not $?) { throw "hererocks failed with $?" }
+      }
+cache:
+  - C:\lua
+  - C:\%GCRYPT_NAME%
+build_script:
+  - cmd: PATH C:\%LUA%\%LUA_VER%\bin;C:\%LUA%\%LUA_VER%\LuaRocks;%PATH%
+  # Look for *.dll in the bin directory
+  - cmd: luarocks make LIBGCRYPT_DIR=C:\%GCRYPT_NAME% LIBGCRYPT_LIBDIR=C:\%GCRYPT_NAME%\bin
+test_script:
+  - cmd: PATH C:\%GCRYPT_NAME%\bin;%PATH%
+  - cmd: lua luagcrypt_test.lua
+deploy: off

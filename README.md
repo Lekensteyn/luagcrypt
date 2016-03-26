@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/Lekensteyn/luagcrypt.svg?branch=master)](https://travis-ci.org/Lekensteyn/luagcrypt)
+[![Build status](https://ci.appveyor.com/api/projects/status/9rlt1msbtnriy04q?svg=true)](https://ci.appveyor.com/project/Lekensteyn/luagcrypt)
 [![Coverage Status](https://coveralls.io/repos/github/Lekensteyn/luagcrypt/badge.svg?branch=master)](https://coveralls.io/github/Lekensteyn/luagcrypt?branch=master)
 
 luagcrypt
