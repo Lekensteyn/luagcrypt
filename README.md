@@ -5,7 +5,24 @@ luagcrypt
 =========
 luagcrypt is a Lua interface to the libgcrypt library, written in C.
 
-It is compatible with Lua 5.1, 5.2 and 5.3.
+It is compatible with Lua 5.1, 5.2 and 5.3 and runs on Linux, OS X and Windows.
+
+
+Installation
+------------
+The minimum requirement is libgcrypt 1.4.2 (libgcrypt-11), but at least
+libgcrypt 1.6.0 (libgcrypt-20) is recommended.
+After ensuring that the Lua and libgcrypt development headers and libraries are
+available, you can invoke `make` to build `luagcrypt.so` with Lua 5.2. See the
+[Makefile](Makefile) file for available variables.
+
+An alternative cross-platform method uses [LuaRocks](https://luarocks.org/).
+Once you have checked out this repository, you can invoke:
+
+    luarocks make
+
+Note for Windows users: the rockspec file uses libgcrypt-20 which is used since
+Wireshark 1.12. Older Wireshark versions use libgcrypt 1.4.6 (libgcrypt-11).
 
 API
 ---
