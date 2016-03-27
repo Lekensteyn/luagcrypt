@@ -30,9 +30,34 @@ end
 
 -- Ensure that advertised constants are never removed.
 function test_constants()
+    assert(gcrypt.CIPHER_IDEA == 1)
+    assert(gcrypt.CIPHER_3DES == 2)
+    assert(gcrypt.CIPHER_CAST5 == 3)
+    assert(gcrypt.CIPHER_BLOWFISH == 4)
     assert(gcrypt.CIPHER_AES128 == 7)
     assert(gcrypt.CIPHER_AES192 == 8)
     assert(gcrypt.CIPHER_AES256 == 9)
+    assert(gcrypt.CIPHER_TWOFISH == 10)
+    assert(gcrypt.CIPHER_ARCFOUR == 301)
+    assert(gcrypt.CIPHER_DES == 302)
+    assert(gcrypt.CIPHER_TWOFISH128 == 303)
+    assert(gcrypt.CIPHER_SERPENT128 == 304)
+    assert(gcrypt.CIPHER_SERPENT192 == 305)
+    assert(gcrypt.CIPHER_SERPENT256 == 306)
+    assert(gcrypt.CIPHER_RFC2268_40 == 307)
+    assert(gcrypt.CIPHER_RFC2268_128 == 308)
+    assert(gcrypt.CIPHER_SEED == 309)
+    assert(gcrypt.CIPHER_CAMELLIA128 == 310)
+    assert(gcrypt.CIPHER_CAMELLIA192 == 311)
+    assert(gcrypt.CIPHER_CAMELLIA256 == 312)
+    if check_version("1.6.0") then
+        assert(gcrypt.CIPHER_SALSA20 == 313)
+        assert(gcrypt.CIPHER_SALSA20R12 == 314)
+        assert(gcrypt.CIPHER_GOST28147 == 315)
+    end
+    if check_version("1.7.0") then
+        assert(gcrypt.CIPHER_CHACHA20 == 316)
+    end
 
     assert(gcrypt.CIPHER_MODE_ECB == 1)
     assert(gcrypt.CIPHER_MODE_CFB == 2)

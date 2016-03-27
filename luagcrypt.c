@@ -486,9 +486,36 @@ luaopen_luagcrypt(lua_State *L)
 
     /* Add constants for gcrypt.Cipher */
     /* https://gnupg.org/documentation/manuals/gcrypt/Available-ciphers.html */
+    INT_GCRY(CIPHER_IDEA);
+    INT_GCRY(CIPHER_3DES);
+    INT_GCRY(CIPHER_CAST5);
+    INT_GCRY(CIPHER_BLOWFISH);
+    /* GCRY_CIPHER_AES and GCRY_CIPHER_RIJNDAEL* are redundant, do not expose
+     * them for now. */
     INT_GCRY(CIPHER_AES128);
     INT_GCRY(CIPHER_AES192);
     INT_GCRY(CIPHER_AES256);
+    INT_GCRY(CIPHER_TWOFISH);
+    INT_GCRY(CIPHER_TWOFISH128);
+    INT_GCRY(CIPHER_ARCFOUR);
+    INT_GCRY(CIPHER_DES);
+    INT_GCRY(CIPHER_SERPENT128);
+    INT_GCRY(CIPHER_SERPENT192);
+    INT_GCRY(CIPHER_SERPENT256);
+    INT_GCRY(CIPHER_RFC2268_40);
+    INT_GCRY(CIPHER_RFC2268_128);
+    INT_GCRY(CIPHER_SEED);
+    INT_GCRY(CIPHER_CAMELLIA128);
+    INT_GCRY(CIPHER_CAMELLIA192);
+    INT_GCRY(CIPHER_CAMELLIA256);
+#if GCRYPT_VERSION_NUMBER >= 0x010600 /* 1.6.0 */
+    INT_GCRY(CIPHER_SALSA20);
+    INT_GCRY(CIPHER_SALSA20R12);
+    INT_GCRY(CIPHER_GOST28147);
+#endif
+#if GCRYPT_VERSION_NUMBER >= 0x010700 /* 1.7.0 */
+    INT_GCRY(CIPHER_CHACHA20);
+#endif
 
     /* https://gnupg.org/documentation/manuals/gcrypt/Available-cipher-modes.html */
     INT_GCRY(CIPHER_MODE_ECB);
