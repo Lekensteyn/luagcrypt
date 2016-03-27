@@ -33,12 +33,25 @@ function test_constants()
     assert(gcrypt.CIPHER_AES128 == 7)
     assert(gcrypt.CIPHER_AES192 == 8)
     assert(gcrypt.CIPHER_AES256 == 9)
+
     assert(gcrypt.CIPHER_MODE_ECB == 1)
+    assert(gcrypt.CIPHER_MODE_CFB == 2)
     assert(gcrypt.CIPHER_MODE_CBC == 3)
+    assert(gcrypt.CIPHER_MODE_STREAM == 4)
+    assert(gcrypt.CIPHER_MODE_OFB == 5)
     assert(gcrypt.CIPHER_MODE_CTR == 6)
-    if not skip_aead then
+    if check_version("1.5.0") then
+        assert(gcrypt.CIPHER_MODE_AESWRAP == 7)
+    end
+    if check_version("1.6.0") then
+        assert(gcrypt.CIPHER_MODE_CCM == 8)
         assert(gcrypt.CIPHER_MODE_GCM == 9)
     end
+    if check_version("1.7.0") then
+        assert(gcrypt.CIPHER_MODE_POLY1305 == 10)
+        assert(gcrypt.CIPHER_MODE_OCB == 11)
+    end
+
     assert(gcrypt.MD_SHA256 == 8)
     assert(gcrypt.MD_FLAG_HMAC == 2)
 end
@@ -83,7 +96,7 @@ function test_aes_ctr_192()
 end
 
 function test_aes_gcm_128()
-    if skip_aead then print("...skipped") return end
+    if not check_version("1.6.0") then return end
     -- http://csrc.nist.gov/groups/ST/toolkit/BCM/documents/proposedmodes/gcm/gcm-revised-spec.pdf
     -- Test case 4
     local plaintext_spec = fromhex("d9313225f88406e5a55909c5aff5269a" ..
@@ -163,7 +176,7 @@ function test_cipher_bad()
 end
 
 function test_cipher_gettag()
-    if skip_aead then print("...skipped") return end
+    if not check_version("1.6.0") then return end
     -- ECB has no tag, it should not succeed
     local cipher = gcrypt.Cipher(gcrypt.CIPHER_AES128, gcrypt.CIPHER_MODE_ECB)
     assert_throws(function() cipher:gettag() end,
@@ -178,7 +191,7 @@ function test_aes_ctr_bad()
 end
 
 function test_aes_gcm_bad()
-    if skip_aead then print("...skipped") return end
+    if not check_version("1.6.0") then return end
     local cipher = gcrypt.Cipher(gcrypt.CIPHER_AES128, gcrypt.CIPHER_MODE_GCM)
     assert_throws(function() cipher:setiv("") end,
     "gcry_cipher_setiv() failed with Invalid length")
@@ -227,10 +240,14 @@ local all_tests = {
     {"test_init_once",      test_init_once},
 }
 
-function main()
-    -- Older Libgcrypt do not provide this interface :-(
-    if not gcrypt.check_version("1.6.0") then skip_aead = true end
+function check_version(req_version)
+    if gcrypt.check_version(req_version) then
+        return true
+    end
+    print("Skipping test because Libgcrypt " .. req_version .. " is required")
+end
 
+function main()
     for k, v in pairs(all_tests) do
         local name, test = v[1], v[2]
         print("Running " .. name .. "...")

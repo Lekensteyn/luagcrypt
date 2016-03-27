@@ -492,10 +492,21 @@ luaopen_luagcrypt(lua_State *L)
 
     /* https://gnupg.org/documentation/manuals/gcrypt/Available-cipher-modes.html */
     INT_GCRY(CIPHER_MODE_ECB);
+    INT_GCRY(CIPHER_MODE_CFB);
     INT_GCRY(CIPHER_MODE_CBC);
+    INT_GCRY(CIPHER_MODE_STREAM);
+    INT_GCRY(CIPHER_MODE_OFB);
     INT_GCRY(CIPHER_MODE_CTR);
+#if GCRYPT_VERSION_NUMBER >= 0x010500 /* 1.5.0 */
+    INT_GCRY(CIPHER_MODE_AESWRAP);
+#endif
 #if GCRYPT_VERSION_NUMBER >= 0x010600 /* 1.6.0 */
+    INT_GCRY(CIPHER_MODE_CCM);
     INT_GCRY(CIPHER_MODE_GCM);
+#endif
+#if GCRYPT_VERSION_NUMBER >= 0x010700 /* 1.7.0 */
+    INT_GCRY(CIPHER_MODE_POLY1305);
+    INT_GCRY(CIPHER_MODE_OCB);
 #endif
 
     INT_GCRY(MD_FLAG_HMAC);
