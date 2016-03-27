@@ -199,7 +199,7 @@ end
 function test_init_once()
     -- TODO is this really desired behavior?
     assert_throws(function() gcrypt.init() end,
-    "libgcrypt was already initialized")
+    "Libgcrypt was already initialized")
 end
 
 local all_tests = {
@@ -218,7 +218,7 @@ local all_tests = {
 }
 
 function main()
-    -- Older libgcrypt do not provide this interface :-(
+    -- Older Libgcrypt do not provide this interface :-(
     if not gcrypt.CIPHER_MODE_GCM then skip_aead = true end
 
     for k, v in pairs(all_tests) do

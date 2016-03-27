@@ -1,5 +1,5 @@
 /**
- * Lua interface to libgcrypt.
+ * Lua interface to Libgcrypt.
  *
  * Copyright (C) 2016 Peter Wu <peter@lekensteyn.nl>
  * Licensed under the MIT license. See the LICENSE file for details.
@@ -176,7 +176,7 @@ lgcrypt_cipher_authenticate(lua_State *L)
     return 0;
 }
 
-/* libgcrypt 1.6.5 has some quirks
+/* Libgcrypt 1.6.5 has some quirks
  * https://lists.gnupg.org/pipermail/gcrypt-devel/2016-March/003754.html */
 static size_t
 get_tag_length(LgcryptCipher *state)
@@ -434,7 +434,7 @@ static int
 lgcrypt_init(lua_State *L)
 {
     if (gcry_control(GCRYCTL_INITIALIZATION_FINISHED_P)) {
-        luaL_error(L, "libgcrypt was already initialized");
+        luaL_error(L, "Libgcrypt was already initialized");
     }
     gcry_check_version(NULL);
     gcry_control(GCRYCTL_DISABLE_SECMEM, 0);
