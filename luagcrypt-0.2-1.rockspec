@@ -1,8 +1,9 @@
 package = "luagcrypt"
-version = "scm-0"
+version = "0.2-1"
 
 source = {
   url = "git://github.com/Lekensteyn/luagcrypt.git",
+  tag = "v0.2",
 }
 
 description = {
