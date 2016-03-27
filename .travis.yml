@@ -35,7 +35,7 @@ before_install:
 script:
   - if [ "$TRAVIS_OS_NAME" = linux ]; then LIBFLAG=-shared; fi
   - if [ "$TRAVIS_OS_NAME" = osx ]; then LIBFLAG="-bundle -undefined dynamic_lookup -all_load"; fi
-  - luarocks make CFLAGS="-O2 -fPIC -Wall -Wextra -Werror --coverage" LIBFLAG="$LIBFLAG --coverage"
+  - luarocks make luagcrypt-scm-0.rockspec CFLAGS="-O2 -fPIC -Wall -Wextra -Werror --coverage" LIBFLAG="$LIBFLAG --coverage"
   - lua luagcrypt_test.lua
 
 after_success:

@@ -38,7 +38,7 @@ cache:
 build_script:
   - cmd: PATH C:\%LUA%\%LUA_VER%\bin;C:\%LUA%\%LUA_VER%\LuaRocks;%PATH%
   # Look for *.dll in the bin directory
-  - cmd: luarocks make LIBGCRYPT_DIR=C:\%GCRYPT_NAME% LIBGCRYPT_LIBDIR=C:\%GCRYPT_NAME%\bin
+  - cmd: luarocks make luagcrypt-scm-0.rockspec LIBGCRYPT_DIR=C:\%GCRYPT_NAME% LIBGCRYPT_LIBDIR=C:\%GCRYPT_NAME%\bin
 test_script:
   - cmd: PATH C:\%GCRYPT_NAME%\bin;%PATH%
   - cmd: lua luagcrypt_test.lua
