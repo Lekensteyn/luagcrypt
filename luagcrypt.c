@@ -442,10 +442,22 @@ lgcrypt_init(lua_State *L)
     return 0;
 }
 
+static int
+lgcrypt_check_version(lua_State *L)
+{
+    const char *req_version, *version;
+
+    req_version = luaL_optstring(L, 1, NULL);
+    version = gcry_check_version(req_version);
+    lua_pushstring(L, version);
+    return 1;
+}
+
 static const struct luaL_Reg lgcrypt[] = {
-    {"init",    lgcrypt_init},
-    {"Cipher",  lgcrypt_cipher_open},
-    {"Hash",    lgcrypt_hash_open},
+    {"init",            lgcrypt_init},
+    {"check_version",   lgcrypt_check_version},
+    {"Cipher",          lgcrypt_cipher_open},
+    {"Hash",            lgcrypt_hash_open},
     {NULL, NULL}
 };
 

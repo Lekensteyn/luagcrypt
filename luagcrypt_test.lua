@@ -19,6 +19,15 @@ function fromhex(hex)
     return s
 end
 
+function test_check_version()
+    -- Request version
+    assert(gcrypt.check_version())
+    -- Minimum supported version
+    assert(gcrypt.check_version("1.4.2"))
+    -- Should return nil if the version is not supported
+    assert(gcrypt.check_version("99.9.9") == nil)
+end
+
 -- Ensure that advertised constants are never removed.
 function test_constants()
     assert(gcrypt.CIPHER_AES128 == 7)
@@ -203,6 +212,7 @@ function test_init_once()
 end
 
 local all_tests = {
+    {"test_check_version",  test_check_version},
     {"test_constants",      test_constants},
     {"test_aes_cbc_128",    test_aes_cbc_128},
     {"test_aes_ctr_192",    test_aes_ctr_192},
@@ -219,7 +229,7 @@ local all_tests = {
 
 function main()
     -- Older Libgcrypt do not provide this interface :-(
-    if not gcrypt.CIPHER_MODE_GCM then skip_aead = true end
+    if not gcrypt.check_version("1.6.0") then skip_aead = true end
 
     for k, v in pairs(all_tests) do
         local name, test = v[1], v[2]
