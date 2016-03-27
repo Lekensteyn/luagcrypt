@@ -33,7 +33,7 @@ install:
         if (-Not $?) { throw "hererocks failed with $?" }
       }
 cache:
-  - C:\lua
+  - C:\%LUA%
   - C:\%GCRYPT_NAME%
 build_script:
   - cmd: PATH C:\%LUA%\%LUA_VER%\bin;C:\%LUA%\%LUA_VER%\LuaRocks;%PATH%
