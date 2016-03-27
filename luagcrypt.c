@@ -55,17 +55,18 @@ lgcrypt_cipher_new(lua_State *L)
 static int
 lgcrypt_cipher_open(lua_State *L)
 {
-    int algo, mode;
+    int algo, mode, flags;
     LgcryptCipher *state;
     gcry_error_t err;
 
     algo = luaL_checkint(L, 1);
     mode = luaL_checkint(L, 2);
+    flags = (unsigned int)luaL_optinteger(L, 3, 0);
 
     state = lgcrypt_cipher_new(L);
     state->mode = mode;
 
-    err = gcry_cipher_open(&state->h, algo, mode, 0);
+    err = gcry_cipher_open(&state->h, algo, mode, flags);
     if (err) {
         lua_pop(L, 1);
         luaL_error(L, "gcry_cipher_open() failed with %s", gcry_strerror(err));
