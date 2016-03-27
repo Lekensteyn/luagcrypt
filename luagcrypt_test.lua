@@ -77,7 +77,38 @@ function test_constants()
         assert(gcrypt.CIPHER_MODE_OCB == 11)
     end
 
+    assert(gcrypt.MD_SHA1 == 2)
+    assert(gcrypt.MD_RMD160 == 3)
+    assert(gcrypt.MD_MD5 == 1)
+    assert(gcrypt.MD_MD4 == 301)
+    assert(gcrypt.MD_TIGER == 6)
+    if check_version("1.5.0") then
+        assert(gcrypt.MD_TIGER1 == 306)
+        assert(gcrypt.MD_TIGER2 == 307)
+    end
+    assert(gcrypt.MD_SHA224 == 11)
     assert(gcrypt.MD_SHA256 == 8)
+    assert(gcrypt.MD_SHA384 == 9)
+    assert(gcrypt.MD_SHA512 == 10)
+    assert(gcrypt.MD_CRC32 == 302)
+    assert(gcrypt.MD_CRC32_RFC1510 == 303)
+    assert(gcrypt.MD_CRC24_RFC2440 == 304)
+    assert(gcrypt.MD_WHIRLPOOL == 305)
+    if check_version("1.6.0") then
+        assert(gcrypt.MD_GOSTR3411_94 == 308)
+        assert(gcrypt.MD_STRIBOG256 == 309)
+        assert(gcrypt.MD_STRIBOG512 == 310)
+    end
+    if check_version("1.7.0") then
+        assert(gcrypt.MD_GOSTR3411_CP == 311)
+        assert(gcrypt.MD_SHA3_224 == 312)
+        assert(gcrypt.MD_SHA3_256 == 313)
+        assert(gcrypt.MD_SHA3_384 == 314)
+        assert(gcrypt.MD_SHA3_512 == 315)
+        assert(gcrypt.MD_SHAKE128 == 316)
+        assert(gcrypt.MD_SHAKE256 == 317)
+    end
+
     assert(gcrypt.MD_FLAG_HMAC == 2)
 end
 

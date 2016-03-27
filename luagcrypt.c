@@ -539,7 +539,37 @@ luaopen_luagcrypt(lua_State *L)
     INT_GCRY(MD_FLAG_HMAC);
 
     /* https://gnupg.org/documentation/manuals/gcrypt/Available-hash-algorithms.html */
+    INT_GCRY(MD_SHA1);
+    INT_GCRY(MD_RMD160);
+    INT_GCRY(MD_MD5);
+    INT_GCRY(MD_MD4);
+    INT_GCRY(MD_TIGER);
+#if GCRYPT_VERSION_NUMBER >= 0x010500 /* 1.5.0 */
+    INT_GCRY(MD_TIGER1);
+    INT_GCRY(MD_TIGER2);
+#endif
+    INT_GCRY(MD_SHA224);
     INT_GCRY(MD_SHA256);
+    INT_GCRY(MD_SHA384);
+    INT_GCRY(MD_SHA512);
+    INT_GCRY(MD_CRC32);
+    INT_GCRY(MD_CRC32_RFC1510);
+    INT_GCRY(MD_CRC24_RFC2440);
+    INT_GCRY(MD_WHIRLPOOL);
+#if GCRYPT_VERSION_NUMBER >= 0x010600 /* 1.6.0 */
+    INT_GCRY(MD_GOSTR3411_94);
+    INT_GCRY(MD_STRIBOG256);
+    INT_GCRY(MD_STRIBOG512);
+#endif
+#if GCRYPT_VERSION_NUMBER >= 0x010700 /* 1.7.0 */
+    INT_GCRY(MD_GOSTR3411_CP);
+    INT_GCRY(MD_SHA3_224);
+    INT_GCRY(MD_SHA3_256);
+    INT_GCRY(MD_SHA3_384);
+    INT_GCRY(MD_SHA3_512);
+    INT_GCRY(MD_SHAKE128);
+    INT_GCRY(MD_SHAKE256);
+#endif
 #undef INT_GCRY
 
     return 1;
