@@ -32,14 +32,22 @@ Documentation
 The interface closely mimics the [Libgcrypt API][0]. The following text assume
 the module name to be `gcrypt = require("luagcrypt")` for convenience.
 
-Functions are grouped by their purpose:
- - [Symmetric cryptography][1] - `gcrypt.Cipher`
- - [Hashing][2] - `gcrypt.Hash`
+Available functions under the module scope:
+ - [Symmetric cryptography][1] - `cipher = gcrypt.Cipher(algo, mode[, flags])`
+ - [Hashing][2] - `md = gcrypt.Hash(algo[, flags])`
+ - [`version = gcrypt.check_version([req_version])`][3] - retrieve the Libgcrypt
+   version string. If `req_version` is given, then `nil` may be returned if the
+   required version is not satisfied.
 
-In general, the `*_open` routines correspond to invoking the above constructors.
-`*_close` functions are called implicitly when an instance can be garbage
-collected. Length parameters are omitted when these can be inferred from the
-string length.
+For the documentation of available functions, see the [Libgcrypt manual][0]. The
+above constructors correspond to the `gcry_*_open` routines. Resource
+deallocation (`gcry_*_close`) are handled implicitly by garbage collection.
+Length parameters are omitted when these can be inferred from the string length.
+For example, Libgcrypt's `gcry_cipher_setkey(cipher, key, key_len)` matches
+`cipher:setkey(key)` in Lua.
+
+An error is thrown if any error occurs, that is, when the Libgcrypt functions
+return non-zero. (The error message text may change in the future.)
 
 Constants like `GCRY_CIPHER_AES256` are exposed as `gcrypt.CIPHER_AES256`
 (without the `GCRY_` prefix).
@@ -51,31 +59,33 @@ The test suite contains representative examples, see
 
 Another full example to calculate a SHA-256 message digest for standard input:
 
-    local gcrypt = require("luagcrypt")
-    -- Initialize the gcrypt library (required for standalone applications that
-    -- do not use Libgcrypt themselves).
-    gcrypt.init()
+```lua
+local gcrypt = require("luagcrypt")
+-- Initialize the gcrypt library (required for standalone applications that
+-- do not use Libgcrypt themselves).
+gcrypt.init()
 
-    -- Convert bytes to their hexadecimal representation
-    function tohex(s)
-        local hex = string.gsub(s, ".", function(c)
-            return string.format("%02x", string.byte(c))
-        end)
-        return hex
+-- Convert bytes to their hexadecimal representation
+function tohex(s)
+    local hex = string.gsub(s, ".", function(c)
+        return string.format("%02x", string.byte(c))
+    end)
+    return hex
+end
+
+local md = gcrypt.Hash(gcrypt.MD_SHA256)
+
+-- Keep reading from standard input until EOF and update the hash state
+repeat
+    local data = io.read(4096)
+    if data then
+        md:write(data)
     end
+until not data
 
-    local md = gcrypt.Hash(gcrypt.MD_SHA256)
-
-    -- Keep reading from standard input until EOF and update the hash state
-    repeat
-        local data = io.read(4096)
-        if data then
-            md:write(data)
-        end
-    until not data
-
-    -- Extract the hash as hexadecimal value
-    print(tohex(md:read()))
+-- Extract the hash as hexadecimal value
+print(tohex(md:read()))
+```
 
 Tests
 -----
@@ -85,13 +95,6 @@ The basic test suite requires just Libgcrypt and Lua and can be invoked with
 Run the code coverage checker with:
 
     make checkcoverage LUA_DIR=/usr
-
-TODO
-----
- - Documentation for available functions (other than looking in luagcrypt.c).
- - Expose more API functions (public key crypto, HMAC) and constants as required.
- - Is the current approach of throwing exceptions acceptable? Or should users
-   just check the return value? (Will probably not happen.)
 
 License
 -------
@@ -103,3 +106,4 @@ This project ("luagcrypt") is licensed under the MIT license. See the
  [0]: https://gnupg.org/documentation/manuals/gcrypt/
  [1]: https://gnupg.org/documentation/manuals/gcrypt/Symmetric-cryptography.html
  [2]: https://gnupg.org/documentation/manuals/gcrypt/Hashing.html
+ [3]: https://gnupg.org/documentation/manuals/gcrypt/Initializing-the-library.html
