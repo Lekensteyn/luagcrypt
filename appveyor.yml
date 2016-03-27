@@ -3,10 +3,15 @@ image: Visual Studio 2013
 init:
   - cmd: '"C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat" x64'
 environment:
-  LUA: lua
-  LUA_VER: 5.2
   # Wireshark's libs include libgcrypt 1.6.2
   GCRYPT_NAME: gnutls-3.2.15-2.9-win64ws
+  matrix:
+  - { LUA: lua,    LUA_VER: 5.1 }
+  - { LUA: lua,    LUA_VER: 5.2 }
+  - { LUA: lua,    LUA_VER: 5.3 }
+  - { LUA: luajit, LUA_VER: 2.0 }
+  - { LUA: luajit, LUA_VER: 2.1 }
+
 install:
   - ps: |-
       if (-Not (Test-Path "C:\$Env:GCRYPT_NAME\bin")) {
