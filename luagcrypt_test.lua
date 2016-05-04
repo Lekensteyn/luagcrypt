@@ -75,6 +75,7 @@ function test_constants()
     if check_version("1.7.0") then
         assert(gcrypt.CIPHER_MODE_POLY1305 == 10)
         assert(gcrypt.CIPHER_MODE_OCB == 11)
+        assert(gcrypt.CIPHER_MODE_CFB8 == 12)
     end
 
     assert(gcrypt.MD_SHA1 == 2)

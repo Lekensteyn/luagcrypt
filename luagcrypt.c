@@ -535,6 +535,7 @@ luaopen_luagcrypt(lua_State *L)
 #if GCRYPT_VERSION_NUMBER >= 0x010700 /* 1.7.0 */
     INT_GCRY(CIPHER_MODE_POLY1305);
     INT_GCRY(CIPHER_MODE_OCB);
+    INT_GCRY(CIPHER_MODE_CFB8);
 #endif
 
     INT_GCRY(MD_FLAG_HMAC);
