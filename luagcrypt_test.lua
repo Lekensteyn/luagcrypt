@@ -220,6 +220,8 @@ function test_cipher_bad()
     local cipher = gcrypt.Cipher(gcrypt.CIPHER_AES128, gcrypt.CIPHER_MODE_CBC)
     assert_throws(function() cipher:setkey("") end,
     "gcry_cipher_setkey() failed with Invalid key length")
+    -- Set key or encrypt will fail with "Missing key" since Libgcrypt 1.7
+    cipher:setkey(string.rep("x", 16))
     -- Must normally be a multiple of block size
     assert_throws(function() cipher:encrypt("x") end,
     "gcry_cipher_encrypt() failed with Invalid length")
