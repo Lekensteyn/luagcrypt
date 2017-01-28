@@ -7,6 +7,7 @@
 #include <gcrypt.h>
 #include <lua.h>
 #include <lauxlib.h>
+#include <stdint.h>
 
 int luaopen_luagcrypt(lua_State *L);
 
@@ -36,6 +37,11 @@ luaL_setfuncs(lua_State *L, const luaL_Reg *l, int nup)
 typedef struct {
     gcry_cipher_hd_t h;
     int mode;           /* Cipher mode */
+#if GCRYPT_VERSION_NUMBER / 0x100 == 0x0106 /* 1.6.x */
+    /* Libgcrypt 1.6 is the first to introduce CCM support, but it has no
+     * interface to extract the tag length. Therefore cache the value here. */
+    unsigned int ccm_authlen;
+#endif
 } LgcryptCipher;
 
 /* Initializes a new gcrypt.Cipher userdata and pushes it on the stack. */
@@ -47,6 +53,9 @@ lgcrypt_cipher_new(lua_State *L)
     state = (LgcryptCipher *) lua_newuserdata(L, sizeof(LgcryptCipher));
     state->h = NULL;
     state->mode = 0;
+#if GCRYPT_VERSION_NUMBER / 0x100 == 0x0106 /* 1.6.x */
+    state->ccm_authlen = 0;
+#endif
     luaL_getmetatable(L, "gcrypt.Cipher");
     lua_setmetatable(L, -2);
     return state;
@@ -189,7 +198,16 @@ get_tag_length(LgcryptCipher *state)
     err = gcry_cipher_info(state->h, GCRYCTL_GET_TAGLEN, NULL, &nbytes);
     return !err ? nbytes : 0;
 #else
-    return state->mode == GCRY_CIPHER_MODE_GCM ? 16 : 0;
+    switch (state->mode) {
+#if GCRYPT_VERSION_NUMBER >= 0x010600 /* 1.6.0 */
+    case GCRY_CIPHER_MODE_CCM:
+        return state->ccm_authlen;
+#endif
+    case GCRY_CIPHER_MODE_GCM:
+        return 16;
+    default:
+        return 0;
+    }
 #endif
 }
 
@@ -273,6 +291,42 @@ lgcrypt_cipher_decrypt(lua_State *L)
     return 1;
 }
 
+static int
+lgcrypt_cipher_ctl(lua_State *L)
+{
+#if GCRYPT_VERSION_NUMBER >= 0x010600 /* 1.6.0 */
+    LgcryptCipher *state = checkCipher(L, 1);
+#endif
+    int cmd;
+    gcry_error_t err;
+
+    cmd = luaL_checkint(L, 2);
+
+    switch (cmd) {
+#if GCRYPT_VERSION_NUMBER >= 0x010600 /* 1.6.0 */
+    case GCRYCTL_SET_CCM_LENGTHS:
+    {
+        uint64_t buf[3];
+        buf[0] = luaL_checkint(L, 3); /* encryptlen */
+        buf[1] = luaL_checkint(L, 4); /* aadlen */
+        buf[2] = luaL_checkint(L, 5); /* authtaglen */
+        err = gcry_cipher_ctl(state->h, cmd, buf, sizeof(buf));
+#if GCRYPT_VERSION_NUMBER / 0x100 == 0x0106 /* 1.6.x */
+        state->ccm_authlen = buf[2];
+#endif
+        break;
+    }
+#endif
+    default:
+        return luaL_error(L, "Unsupported control function");
+    }
+
+    if (err) {
+        luaL_error(L, "gcry_cipher_ctl() failed with %s", gcry_strerror(err));
+    }
+    return 0;
+}
+
 
 /* https://gnupg.org/documentation/manuals/gcrypt/Working-with-cipher-handles.html */
 static const struct luaL_Reg lgcrypt_cipher_meta[] = {
@@ -288,6 +342,7 @@ static const struct luaL_Reg lgcrypt_cipher_meta[] = {
 #endif
     {"encrypt",         lgcrypt_cipher_encrypt},
     {"decrypt",         lgcrypt_cipher_decrypt},
+    {"ctl",             lgcrypt_cipher_ctl},
     {NULL,              NULL}
 };
 /* }}} */
@@ -484,6 +539,10 @@ luaopen_luagcrypt(lua_State *L)
     lua_pushinteger(L, GCRY_ ## name); \
     lua_setfield(L, -2, #name); \
     } while (0)
+#define INT_GCRYCTL(name) do { \
+    lua_pushinteger(L, GCRYCTL_ ## name); \
+    lua_setfield(L, -2, "CTL_" #name); \
+    } while (0)
 
     /* Add constants for gcrypt.Cipher */
     /* https://gnupg.org/documentation/manuals/gcrypt/Available-ciphers.html */
@@ -531,6 +590,7 @@ luaopen_luagcrypt(lua_State *L)
 #if GCRYPT_VERSION_NUMBER >= 0x010600 /* 1.6.0 */
     INT_GCRY(CIPHER_MODE_CCM);
     INT_GCRY(CIPHER_MODE_GCM);
+    INT_GCRYCTL(SET_CCM_LENGTHS);
 #endif
 #if GCRYPT_VERSION_NUMBER >= 0x010700 /* 1.7.0 */
     INT_GCRY(CIPHER_MODE_POLY1305);

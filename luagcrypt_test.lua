@@ -177,7 +177,38 @@ function test_aes_gcm_128()
 
     cipher:reset()
     cipher:setiv(iv)
+    cipher:authenticate(adata)
     assert(cipher:decrypt(ciphertext_spec) == plaintext_spec)
+    assert(cipher:gettag() == atag)
+end
+
+function test_aes_ccm_128()
+    if not check_version("1.6.0") then return end
+    -- http://dx.doi.org/10.6028/NIST.SP.800-38C Example Vectors C.3
+    -- "C" from the document is composed of ciphertext_spec and auth tag.
+    local plaintext_spec = fromhex("202122232425262728292a2b2c2d2e2f" ..
+                                   "3031323334353637")
+    local ciphertext_spec = fromhex("e3b201a9f5b71a7a9b1ceaeccd97e70b" ..
+                                    "6176aad9a4428aa5")
+    local adata = fromhex("000102030405060708090a0b0c0d0e0f" .. "10111213")
+    local atag = fromhex("484392fbc1b09951")
+    local nonce = fromhex("101112131415161718191a1b")
+    local cipher = gcrypt.Cipher(gcrypt.CIPHER_AES128, gcrypt.CIPHER_MODE_CCM)
+    cipher:setkey(fromhex("404142434445464748494a4b4c4d4e4f"))
+    cipher:setiv(nonce)
+    -- Lengths: (data to) encrypt, AAD, auth tag
+    cipher:ctl(gcrypt.CTL_SET_CCM_LENGTHS, #plaintext_spec, #adata, #atag)
+    cipher:authenticate(adata)
+    assert(cipher:encrypt(plaintext_spec) == ciphertext_spec)
+    assert(cipher:gettag() == atag)
+    cipher:checktag(atag)
+
+    cipher:reset()
+    cipher:setiv(nonce)
+    cipher:ctl(gcrypt.CTL_SET_CCM_LENGTHS, #plaintext_spec, #adata, #atag)
+    cipher:authenticate(adata)
+    assert(cipher:decrypt(ciphertext_spec) == plaintext_spec)
+    assert(cipher:gettag() == atag)
 end
 
 function test_hmac_sha256()
@@ -289,6 +320,7 @@ local all_tests = {
     {"test_aes_cbc_128",    test_aes_cbc_128},
     {"test_aes_ctr_192",    test_aes_ctr_192},
     {"test_aes_gcm_128",    test_aes_gcm_128},
+    {"test_aes_ccm_128",    test_aes_ccm_128},
     {"test_hmac_sha256",    test_hmac_sha256},
     {"test_sha256",         test_sha256},
     {"test_cipher_bad",     test_cipher_bad},
