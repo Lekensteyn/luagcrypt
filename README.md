@@ -26,6 +26,14 @@ Once you have checked out this repository, you can invoke:
 
 Note for Windows users: the rockspec file uses libgcrypt-20 which is used since
 Wireshark 1.12. Older Wireshark versions use Libgcrypt 1.4.6 (libgcrypt-11).
+Header files and precompiled libraries (libgcrypt-20.dll and its dependency
+libgpg-error-0.dll) can be found here:
+
+ - Libgcrypt 1.7.6 for Wireshark 2.4: [64-bit][4], [32-bit][5].
+ - Libgcrypt 1.6.2 for Wireshark 2.2/2.0/1.12: [64-bit][6], [32-bit][7].
+
+Be sure to build with Lua 5.2 ([64-bit][8], [32-bit][9]) if you intend to use
+the library with Wireshark.
 
 Documentation
 -------------
@@ -107,3 +115,9 @@ This project ("luagcrypt") is licensed under the MIT license. See the
  [1]: https://gnupg.org/documentation/manuals/gcrypt/Symmetric-cryptography.html
  [2]: https://gnupg.org/documentation/manuals/gcrypt/Hashing.html
  [3]: https://gnupg.org/documentation/manuals/gcrypt/Initializing-the-library.html
+ [4]: https://anonsvn.wireshark.org/wireshark-win64-libs/tags/2017-02-15/packages/libgcrypt-1.7.6-win64ws.zip
+ [5]: https://anonsvn.wireshark.org/wireshark-win32-libs/tags/2017-02-15/packages/libgcrypt-1.7.6-win32ws.zip
+ [6]: https://anonsvn.wireshark.org/wireshark-win64-libs/tags/2016-12-12/packages/gnutls-3.2.15-2.9-win64ws.zip
+ [7]: https://anonsvn.wireshark.org/wireshark-win32-libs/tags/2016-12-12/packages/gnutls-3.2.15-2.7-win32ws.zip
+ [8]: https://anonsvn.wireshark.org/wireshark-win64-libs/tags/2016-08-31/packages/lua-5.2.4_Win64_dllw4_lib.zip
+ [9]: https://anonsvn.wireshark.org/wireshark-win32-libs/tags/2016-08-31/packages/lua-5.2.4_Win32_dllw4_lib.zip
