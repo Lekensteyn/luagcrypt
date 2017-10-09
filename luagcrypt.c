@@ -538,7 +538,7 @@ luaopen_luagcrypt(lua_State *L)
     INT_GCRY(CIPHER_MODE_CFB8);
 #endif
 
-    INT_GCRY(MD_FLAG_HMAC);
+    INT_GCRY(CIPHER_CBC_CTS);
 
     /* https://gnupg.org/documentation/manuals/gcrypt/Available-hash-algorithms.html */
     INT_GCRY(MD_SHA1);
@@ -572,6 +572,8 @@ luaopen_luagcrypt(lua_State *L)
     INT_GCRY(MD_SHAKE128);
     INT_GCRY(MD_SHAKE256);
 #endif
+
+    INT_GCRY(MD_FLAG_HMAC);
 #undef INT_GCRY
 
     return 1;
