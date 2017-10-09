@@ -3,8 +3,8 @@ image: Visual Studio 2013
 init:
   - cmd: '"C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat" x64'
 environment:
-  # Wireshark's libs include libgcrypt 1.6.2
-  GCRYPT_NAME: gnutls-3.2.15-2.9-win64ws
+  # Wireshark 2.4 includes libgcrypt 1.7.6
+  GCRYPT_NAME: libgcrypt-1.7.6-win64ws
   matrix:
   - { LUA: lua,    LUA_VER: 5.1 }
   - { LUA: lua,    LUA_VER: 5.2 }
@@ -15,8 +15,8 @@ environment:
 install:
   - ps: |-
       if (-Not (Test-Path "C:\$Env:GCRYPT_NAME\bin")) {
-        & svn export https://anonsvn.wireshark.org/wireshark-win64-libs/trunk/packages/$Env:GCRYPT_NAME.zip
-        if (-Not $?) { throw "svn failed with $?" }
+        Invoke-WebRequest "https://anonsvn.wireshark.org/wireshark-win64-libs/tags/2017-02-15/packages/$Env:GCRYPT_NAME.zip" -OutFile "$Env:GCRYPT_NAME.zip"
+        if (-Not $?) { throw "download failed with $?" }
         & 7z x -aoa -oC:\ "$Env:GCRYPT_NAME.zip" `
              "-ir!gpg-error.h"       "-ir!gcrypt.h" `
           "-ir!libgpg-error*.lib" "-ir!libgcrypt*.lib" `
