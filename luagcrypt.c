@@ -11,7 +11,7 @@
 int luaopen_luagcrypt(lua_State *L);
 
 /* {{{ Compatibility with older Lua */
-#if LUA_VERSION_NUM == 501
+#if LUA_VERSION_NUM == 501 && !defined(luaL_newlib)
 static void
 luaL_setfuncs(lua_State *L, const luaL_Reg *l, int nup)
 {
