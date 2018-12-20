@@ -42,4 +42,6 @@ build_script:
 test_script:
   - cmd: PATH C:\%GCRYPT_NAME%\bin;%PATH%
   - cmd: lua luagcrypt_test.lua
+artifacts:
+ - path: luagcrypt.dll
 deploy: off
