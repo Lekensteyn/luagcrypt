@@ -29,8 +29,12 @@ Wireshark 1.12. Older Wireshark versions use Libgcrypt 1.4.6 (libgcrypt-11).
 Header files and precompiled libraries (libgcrypt-20.dll and its dependency
 libgpg-error-0.dll) can be found here:
 
- - Libgcrypt 1.7.6 for Wireshark 2.4: [64-bit][4], [32-bit][5].
- - Libgcrypt 1.6.2 for Wireshark 2.2/2.0/1.12: [64-bit][6], [32-bit][7].
+ - Libgcrypt 1.8.3 for Wireshark 3.0: [64-bit][10], [32-bit][11]
+   (libgcrypt-20.dll, should be compatible with Wireshark 2.4 as well)
+ - Libgcrypt 1.7.6 for Wireshark 2.4/2.6: [64-bit][4], [32-bit][5]
+   (libgcrypt-20.dll)
+ - Libgcrypt 1.6.2 for Wireshark 2.2/2.0/1.12: [64-bit][6], [32-bit][7]
+   (libgcrypt-11.dll)
 
 Be sure to build with Lua 5.2 ([64-bit][8], [32-bit][9]) if you intend to use
 the library with Wireshark.
@@ -121,3 +125,5 @@ This project ("luagcrypt") is licensed under the MIT license. See the
  [7]: https://anonsvn.wireshark.org/wireshark-win32-libs/tags/2016-12-12/packages/gnutls-3.2.15-2.7-win32ws.zip
  [8]: https://anonsvn.wireshark.org/wireshark-win64-libs/tags/2016-08-31/packages/lua-5.2.4_Win64_dllw4_lib.zip
  [9]: https://anonsvn.wireshark.org/wireshark-win32-libs/tags/2016-08-31/packages/lua-5.2.4_Win32_dllw4_lib.zip
+ [10]: https://anonsvn.wireshark.org/wireshark-win64-libs/tags/2018-08-04/packages/libgcrypt-1.8.3-win64ws.zip
+ [11]: https://anonsvn.wireshark.org/wireshark-win32-libs/tags/2018-08-04/packages/libgcrypt-1.8.3-win32ws.zip
