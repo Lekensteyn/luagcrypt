@@ -1,7 +1,7 @@
 version: 0.0.{build}
-image: Visual Studio 2013
+image: Visual Studio 2015
 init:
-  - cmd: '"C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat" x64'
+  - cmd: '"C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" x64'
 environment:
   # Wireshark 2.4 includes libgcrypt 1.7.6
   GCRYPT_NAME: libgcrypt-1.7.6-win64ws
