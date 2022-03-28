@@ -2,7 +2,7 @@ package = "luagcrypt"
 version = "0.2-1"
 
 source = {
-  url = "git://github.com/Lekensteyn/luagcrypt.git",
+  url = "git+http://github.com/Lekensteyn/luagcrypt.git",
   tag = "v0.2",
 }
 
